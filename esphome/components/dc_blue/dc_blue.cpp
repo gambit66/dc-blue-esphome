@@ -116,6 +116,12 @@ namespace esphome
       {
         this->light_binary_sensor_->publish_state(false);
       }
+
+      ESP_LOGD(TAG, "Assume not running on battery");
+      if (this->battery_binary_sensor_ != nullptr)
+      {
+        this->battery_binary_sensor_->publish_state(false);
+      }
     }
 
     void DcBlueComponent::loop()
@@ -136,92 +142,118 @@ namespace esphome
     {
       switch (frame)
       {
+      case 0x002C2021: // Door closed on battery
+        ESP_LOGD(TAG, "Door closed - battery");
+        this->process_battery_event(true);
+        this->process_door_closed_event();
+        break;
       case 0x002C2425:
         ESP_LOGD(TAG, "Door closed");
-
-        next_direction_ = cover::COVER_OPERATION_OPENING;
-
-        if (this->garage_cover_sensor_ != nullptr)
-        {
-          if (garage_cover_sensor_->position != cover::COVER_CLOSED ||
-              garage_cover_sensor_->current_operation != cover::COVER_OPERATION_IDLE)
-          {
-            garage_cover_sensor_->position = cover::COVER_CLOSED;
-            garage_cover_sensor_->current_operation = cover::COVER_OPERATION_IDLE;
-            garage_cover_sensor_->publish_state();
-          }
-        }
-        else
-        {
-          ESP_LOGD(TAG, "garage_cover is null");
-        }
+        this->process_battery_event(false);
+        this->process_door_closed_event();
+        break;
+      case 0x002C0809: // Opening/Closing on battery
+        ESP_LOGD(TAG, "Opening/Closing - battery");
+        this->process_battery_event(true);
+        this->process_motor_running_event();
         break;
       case 0x002C0C0D:
         ESP_LOGD(TAG, "Opening/Closing");
-
-        if (this->garage_cover_sensor_ != nullptr)
-        {
-          if (garage_cover_sensor_->current_operation != next_direction_)
-          {
-            garage_cover_sensor_->current_operation = next_direction_;
-            garage_cover_sensor_->publish_state();
-          }
-        }
-        else
-        {
-          ESP_LOGD(TAG, "garage_cover is null");
-        }
+        this->process_battery_event(false);
+        this->process_motor_running_event();
+        break;
+      case 0x002C0203: // Door open on battery
+        ESP_LOGD(TAG, "Door open - battery");
+        this->process_battery_event(true);
+        this->process_door_open_event();
         break;
       case 0x002C0607:
         ESP_LOGD(TAG, "Door open");
-
-        next_direction_ = cover::COVER_OPERATION_CLOSING;
-
-        if (this->garage_cover_sensor_ != nullptr)
-        {
-          if (garage_cover_sensor_->position != cover::COVER_OPEN ||
-              garage_cover_sensor_->current_operation != cover::COVER_OPERATION_IDLE)
-          {
-            garage_cover_sensor_->position = cover::COVER_OPEN;
-            garage_cover_sensor_->current_operation = cover::COVER_OPERATION_IDLE;
-            garage_cover_sensor_->publish_state();
-          }
-        }
-        else
-        {
-          ESP_LOGD(TAG, "garage_cover is null");
-        }
+        this->process_battery_event(false);
+        this->process_door_open_event();
         break;
-
       case 0x00551313:
         ESP_LOGD(TAG, "Light on");
-        if (this->light_binary_sensor_ != nullptr)
-        {
-          this->light_binary_sensor_->publish_state(true);
-        }
-        else
-        {
-          ESP_LOGD(TAG, "light_binary_sensor is null");
-        }
+        this->process_light_event(true);
         break;
       case 0x00551515:
         ESP_LOGD(TAG, "Light off");
-        if (this->light_binary_sensor_ != nullptr)
-        {
-          this->light_binary_sensor_->publish_state(false);
-        }
-        else
-        {
-          ESP_LOGD(TAG, "light_binary_sensor is null");
-        }
+        this->process_light_event(false);
         break;
-
       case 0x00550B0B:
         ESP_LOGD(TAG, "Unlock");
         break;
 
       default:
         ESP_LOGD(TAG, "Unknown frame received: %08X", frame);
+      }
+    }
+
+    void DcBlueComponent::process_door_open_event() {
+      this->process_door_state_change_event(cover::COVER_OPEN, cover::COVER_OPERATION_CLOSING);
+    }
+
+    void DcBlueComponent::process_door_closed_event() {
+      this->process_door_state_change_event(cover::COVER_CLOSED, cover::COVER_OPERATION_OPENING);
+    }
+
+    void DcBlueComponent::process_door_state_change_event(float position, cover::CoverOperation next_direction) {
+      next_direction_ = next_direction;
+
+      if (this->garage_cover_sensor_ != nullptr)
+      {
+        if (garage_cover_sensor_->position != position ||
+            garage_cover_sensor_->current_operation != cover::COVER_OPERATION_IDLE)
+        {
+          garage_cover_sensor_->position = position;
+          garage_cover_sensor_->current_operation = cover::COVER_OPERATION_IDLE;
+          garage_cover_sensor_->publish_state();
+        }
+      }
+      else
+      {
+        ESP_LOGD(TAG, "garage_cover is null");
+      }
+    }
+
+    void DcBlueComponent::process_motor_running_event() {
+      if (this->garage_cover_sensor_ != nullptr)
+      {
+        if (garage_cover_sensor_->current_operation != next_direction_)
+        {
+          garage_cover_sensor_->current_operation = next_direction_;
+          garage_cover_sensor_->publish_state();
+        }
+      }
+      else
+      {
+        ESP_LOGD(TAG, "garage_cover is null");
+      }
+    }
+
+    void DcBlueComponent::process_battery_event(bool battery) {
+      if (this->battery_binary_sensor_ != nullptr)
+      {
+        if (this->battery_binary_sensor_->state != battery) {
+          this->battery_binary_sensor_->publish_state(battery);
+        }
+      }
+      else
+      {
+        ESP_LOGD(TAG, "battery_binary_sensor is null");
+      }
+    }
+
+    void DcBlueComponent::process_light_event(bool light) {
+      if (this->light_binary_sensor_ != nullptr)
+      {
+        if (this->light_binary_sensor_->state != light) {
+          this->light_binary_sensor_->publish_state(light);
+        }
+      }
+      else
+      {
+        ESP_LOGD(TAG, "light_binary_sensor is null");
       }
     }
 

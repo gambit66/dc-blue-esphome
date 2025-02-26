@@ -22,6 +22,7 @@ namespace esphome
       SUB_BINARY_SENSOR(closed)  // CONF_CLOSED
       SUB_BINARY_SENSOR(running) // CONF_RUNNING
       SUB_BINARY_SENSOR(light)   // CONF_LIGHT
+      SUB_BINARY_SENSOR(battery) // CONF_BATTERY
 
       DcBlueCover *create_garage_cover_sensor()
       {
@@ -41,6 +42,14 @@ namespace esphome
       void set_inverted(bool inverted) { this->inverted_ = inverted; }
       void set_trigger_period(unsigned long trigger_period) { this->trigger_period_ = trigger_period; }
       void set_clear_period(unsigned long clear_period) { this->clear_period_ = clear_period; }
+
+
+      void process_door_open_event();
+      void process_door_closed_event();
+      void process_door_state_change_event(float position, cover::CoverOperation next_direction);
+      void process_motor_running_event();
+      void process_battery_event(bool battery);
+      void process_light_event(bool light);
 
       static void interrupt_handler();
       InternalGPIOPin *data_pin_{nullptr};
