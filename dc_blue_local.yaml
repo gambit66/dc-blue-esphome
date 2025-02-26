@@ -37,8 +37,8 @@ binary_sensor:
       name: "Garage Motor Light"
       
   - platform: dc_blue
-    battery:
-      name: "Garage Motor on Battery Backup"
+    ac_power:
+      name: "Garage Motor AC supply"      
 
 cover:
   - platform: dc_blue

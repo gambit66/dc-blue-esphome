@@ -22,7 +22,7 @@ namespace esphome
       SUB_BINARY_SENSOR(closed)  // CONF_CLOSED
       SUB_BINARY_SENSOR(running) // CONF_RUNNING
       SUB_BINARY_SENSOR(light)   // CONF_LIGHT
-      SUB_BINARY_SENSOR(battery) // CONF_BATTERY
+      SUB_BINARY_SENSOR(ac_power) // CONF_AC_POWER
 
       DcBlueCover *create_garage_cover_sensor()
       {

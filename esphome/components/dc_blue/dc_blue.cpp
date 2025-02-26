@@ -117,10 +117,10 @@ namespace esphome
         this->light_binary_sensor_->publish_state(false);
       }
 
-      ESP_LOGD(TAG, "Assume not running on battery");
-      if (this->battery_binary_sensor_ != nullptr)
+      ESP_LOGD(TAG, "Assume running on AC mains power");
+      if (this->ac_power_binary_sensor_ != nullptr)
       {
-        this->battery_binary_sensor_->publish_state(false);
+        this->ac_power_binary_sensor_->publish_state(true);
       }
     }
 
@@ -181,9 +181,11 @@ namespace esphome
         this->process_light_event(false);
         break;
       case 0x00550B0B:
-        ESP_LOGD(TAG, "Unlock");
+        ESP_LOGD(TAG, "Strike lock");
         break;
-
+      case 0x00550D0D:
+        ESP_LOGD(TAG, "Magnetic lock");
+        break;
       default:
         ESP_LOGD(TAG, "Unknown frame received: %08X", frame);
       }
@@ -232,15 +234,15 @@ namespace esphome
     }
 
     void DcBlueComponent::process_battery_event(bool battery) {
-      if (this->battery_binary_sensor_ != nullptr)
+      if (this->ac_power_binary_sensor_ != nullptr)
       {
-        if (this->battery_binary_sensor_->state != battery) {
-          this->battery_binary_sensor_->publish_state(battery);
+        if (this->ac_power_binary_sensor_->state == battery) {
+          this->ac_power_binary_sensor_->publish_state(!battery);
         }
       }
       else
       {
-        ESP_LOGD(TAG, "battery_binary_sensor is null");
+        ESP_LOGD(TAG, "ac_power_binary_sensor is null");
       }
     }
 

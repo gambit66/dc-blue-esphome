@@ -48,15 +48,17 @@ dc_blue:
   trigger_pin: GPIO32
   symbol_period: 970
 
-# Add if you want a binary sensor following the garage door motor light
+
 binary_sensor:
+  # Add if you want a binary sensor following the garage door motor light
   - platform: dc_blue
     light:
       name: "Garage Motor Light"
 
+  # Add if you want a binary sensor following the garage door motor AC mains supply status
   - platform: dc_blue
-    battery:
-      name: "Garage Motor on Battery Backup"      
+    ac_power:
+      name: "Garage Motor AC supply"      
 
 # Add a cover sensor for the door state and control
 cover:
