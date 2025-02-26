@@ -54,6 +54,10 @@ binary_sensor:
     light:
       name: "Garage Motor Light"
 
+  - platform: dc_blue
+    battery:
+      name: "Garage Motor on Battery Backup"      
+
 # Add a cover sensor for the door state and control
 cover:
   - platform: dc_blue

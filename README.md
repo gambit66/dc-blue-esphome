@@ -86,6 +86,18 @@ binary_sensor:
 
 By adding this sensor, you will get a boolean sensor in Home Assistant indicating the current state of the garage door motor light.
 
+### Configure battery sensor
+
+```
+# Add if you want a binary sensor to show if the dc blue unit is running off backup battery
+binary_sensor:
+  - platform: dc_blue
+    battery:
+      name: "Garage Motor on Battery Backup"  
+```
+
+By adding this sensor, you will get a boolean sensor in Home Assistant indicating the current state of the power supply.
+
 ### Cover sensor
 
 ```
