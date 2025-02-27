@@ -187,7 +187,7 @@ namespace esphome
         ESP_LOGD(TAG, "Magnetic lock");
         break;
       default:
-        ESP_LOGD(TAG, "Unknown frame received: %08X", frame);
+        ESP_LOGW(TAG, "Unknown frame received: %08X", frame);
       }
     }
 
