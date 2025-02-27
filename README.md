@@ -86,6 +86,18 @@ binary_sensor:
 
 By adding this sensor, you will get a boolean sensor in Home Assistant indicating the current state of the garage door motor light.
 
+### Configure AC supply sensor
+
+```
+# Add if you want a binary sensor to show if the dc blue unit is connected to an AC mains supply
+binary_sensor:
+  - platform: dc_blue
+    ac_power:
+      name: "Garage Motor AC supply"  
+```
+
+By adding this sensor, you will get a boolean sensor in Home Assistant indicating that garage door motor is being powered by an AC mains supply.
+
 ### Cover sensor
 
 ```

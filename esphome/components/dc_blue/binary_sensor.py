@@ -5,6 +5,7 @@ from esphome.components.dc_blue import DcBlueComponent
 from esphome.components.dc_blue.constants import (
     CONF_DC_BLUE_ID,
     CONF_LIGHT,
+    CONF_AC_POWER,
 )
 import esphome.config_validation as cv
 
@@ -14,6 +15,7 @@ DEPENDENCIES = ["dc_blue", "binary_sensor"]
 CONFIG_SCHEMA = cv.Schema(
     {
         cv.Optional(CONF_LIGHT): binary_sensor.binary_sensor_schema(),
+        cv.Optional(CONF_AC_POWER): binary_sensor.binary_sensor_schema(),
     }
 ).extend(
     {
@@ -28,3 +30,7 @@ async def to_code(config):
     if light_config := config.get(CONF_LIGHT):
         sens = await binary_sensor.new_binary_sensor(light_config)
         cg.add(platform.set_light_binary_sensor(sens))
+    
+    if ac_power_config := config.get(CONF_AC_POWER):
+        sens = await binary_sensor.new_binary_sensor(ac_power_config)
+        cg.add(platform.set_ac_power_binary_sensor(sens))
