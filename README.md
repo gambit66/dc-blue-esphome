@@ -63,11 +63,19 @@ external_components:
 ### Configure plaform
 
 ```
-# Initialise the platform
 dc_blue:
+  # Required: Pin where data is received
   data_pin: GPIO33
+  # Required: Pin which is pulled high to "press button"
   trigger_pin: GPIO32
-  # symbol_period: 970
+  # Optional: Time per symbol in us
+  symbol_period: 970
+  # Optional: Is the data signal from the motor inverted by optocoupler?
+  inverted: True
+  # Optional: Time to press button in ms
+  trigger_period: 1000
+  # Optional: Minimum between presses in ms
+  clear_period: 1000
 ```
 
 `data_pin` is where the digital signal from the motor is received.
