@@ -2,7 +2,7 @@
 
 #define PIN 32
 #define BREAK_DELAY_MS 33
-#define BIT_DELAY_US 900
+#define BIT_DELAY_US 970
 #define FRAME_SPACING_MS 10000
 
 void writeBreak();

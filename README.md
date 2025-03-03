@@ -60,7 +60,7 @@ external_components:
     components: [ dc_blue ]
 ```
 
-### Configure plaform
+### Configure platform
 
 ```
 dc_blue:
@@ -132,3 +132,52 @@ This component does not take all these different state transitions into account,
 While the door is opening, pressing stop twice will therefore close the door.
 
 This can be improved by better handling of the door state in `dc_blue_cover.cpp`.
+
+## Factory firmware
+
+The `improv.yaml` file can be used to build a factory default firmware image.
+This configuration provides [improv](https://www.improv-wifi.com/) capabilities.
+It allows sending WiFi credentials to the device, without having to use a USB-Serial adapter.
+
+To load the factory firmware:
+```
+# Erase flash to clear all saved WiFi credentials
+esptool --chip esp32 --port /dev/ttyUSB0 erase_flash
+
+# Build and flash improv firmware
+docker run --rm --privileged -v "${PWD}":/config --device=/dev/ttyUSB0 -it ghcr.io/esphome/esphome run improv.yaml
+```
+
+> Note: You might need to put the ESP32 into programming mode.
+> This is done by holding down the BOOT button, and then momentarily pressing the RESET button.
+> Then releasing BOOT.
+
+### Configure WiFi credentials over BLE
+
+Go to [https://www.improv-wifi.com/](https://www.improv-wifi.com/) and under **Improv via BLE** click on the button **Connect device to Wi-Fi**.
+Follow the wizzard to pair the device, then add WiFi credentials to it.
+
+### Configure using WiFi AP
+
+Scan for available WiFi networks.
+You should see one named "dc-blue-advanced-####".
+Connect to it, then in your browser go to [http://192.168.4.1](http://192.168.4.1).
+You should see a page listing available WiFi networks.
+Choose the network the ESPhome device should use, fill in the password, and wait for it to reconnect.
+
+### Adopting into ESPhome Builder
+
+If either of the previous two steps succeeded, the device should have connected to your WiFi network.
+ESPhome Builder will discover it, and show it as a device that can be adopted.
+
+### Configuration
+
+ESPhome builder will create a default config for the device.
+You can edit this config by adding the configurations described under [Configuration](#configuration).
+The firmware can then be installed on your device.
+
+If building the firmware fails with an OTA error, add the following block to the end of the configuration:
+```
+ota:
+  - platform: esphome
+```

@@ -28,7 +28,7 @@ dc_blue:
   inverted: True
   # Optional: Time to press button in ms
   trigger_period: 1000
-  # Optional: Minimum between presses in ms
+  # Optional: Minimum time between presses in ms
   clear_period: 1000
 
 binary_sensor:
