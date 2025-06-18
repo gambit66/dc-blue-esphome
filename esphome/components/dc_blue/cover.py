@@ -14,7 +14,7 @@ import esphome.config_validation as cv
 DEPENDENCIES = ["dc_blue", "cover"]
 
 
-CONFIG_SCHEMA = cover.COVER_SCHEMA.extend(
+CONFIG_SCHEMA = cover.cover_schema(DcBlueComponent).extend(
     {
         cv.GenerateID(CONF_DC_BLUE_ID): cv.use_id(DcBlueComponent),
     }
