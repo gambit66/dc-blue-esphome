@@ -1,6 +1,7 @@
 esphome:
   name: garage-door
   friendly_name: Garage Door
+  min_version: 2025.7.0
 
 esp32:
   board: esp32dev

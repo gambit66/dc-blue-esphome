@@ -86,9 +86,7 @@ namespace esphome
     void DcBlueComponent::setup()
     {
       instance = this;
-      // Calculate frequency: 1,000,000 microseconds / (symbol_period_ / 2) 
-      uint32_t frequency = 2000000 / this->symbol_period_;
-      Timer0_Cfg = timerBegin(frequency);
+      Timer0_Cfg = timerBegin(1000000);
 
       if (data_pin_ != nullptr)
       {
@@ -105,7 +103,7 @@ namespace esphome
       }
 
       timerAttachInterrupt(Timer0_Cfg, &Timer0_ISR);
-      timerAlarm(Timer0_Cfg, 1000000, true, 0);
+      timerAlarm(Timer0_Cfg, this->symbol_period_ / 2, true, 0);
 
       // pinMode(DEBUG_PIN, OUTPUT);
       // pinMode(TIMER_PIN, OUTPUT);

@@ -13,6 +13,8 @@ from esphome import pins
 CODEOWNERS = ["@jpmeijers"]
 DEPENDENCIES = ["binary_sensor", "cover"]
 
+ESPHOME_VERSION = "2025.7.0"
+
 dc_blue_component_ns = cg.esphome_ns.namespace("dc_blue")
 DcBlueComponent = dc_blue_component_ns.class_("DcBlueComponent", cg.Component)
 

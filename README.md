@@ -7,6 +7,8 @@ The component uses the DC Blue's digital interface to read the state of the door
 Control is done via the button trigger input as the digital interface does not support control.
 This component will only work with the DC Blue Advanced range of door motors, not with older models without the digital interface.
 
+> **Note:** This component requires ESPHome 2025.7.0 or newer due to ESP32 Arduino framework changes.
+
 ## Wiring
 
 On the top side of the motor you will find two screw terminal blocks.

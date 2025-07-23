@@ -13,6 +13,7 @@ esphome:
   platform: ESP32
   board: esp32dev
   build_path: .build/dc_blue_test
+  min_version: 2025.7.0
 
 status_led:
   pin: GPIO2
