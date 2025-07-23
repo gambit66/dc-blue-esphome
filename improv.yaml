@@ -13,6 +13,7 @@ esphome:
   # Automatically add the mac address to the name
   # so you can use a single firmware for all devices
   name_add_mac_suffix: true
+  min_version: 2025.7.0
 
   # This will allow for (future) project identification,
   # configuration and updates.
