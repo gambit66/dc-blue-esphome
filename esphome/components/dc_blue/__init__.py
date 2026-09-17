@@ -1,7 +1,7 @@
 import esphome.codegen as cg
 import esphome.config_validation as cv
 from esphome.cpp_helpers import gpio_pin_expression
-from esphome.components import uart
+from esphome.components import esp32
 from esphome.const import (
     CONF_DATA_PIN,
     CONF_TRIGGER_PIN,
@@ -32,6 +32,11 @@ CONFIG_SCHEMA = cv.Schema(
 
 
 async def to_code(config):
+    # ESPHome 2026.9+ excludes GPTimer by default. Older versions without this
+    # helper already include the driver, so retain compatibility with them.
+    if hasattr(esp32, "include_builtin_idf_component"):
+        esp32.include_builtin_idf_component("esp_driver_gptimer")
+
     var = cg.new_Pvariable(config[CONF_ID])
     await cg.register_component(var, config)
 
