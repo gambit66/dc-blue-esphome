@@ -15,14 +15,14 @@ This component supports both ESP32 frameworks:
 
 | Framework | Status | Notes |
 |-----------|--------|-------|
-| **Arduino** | ✅ Supported | Legacy framework |
+| **Arduino** | ✅ Supported | Uses the ESP-IDF GPTimer driver |
 | **ESP-IDF** | ✅ Supported | Default framework, smaller binary size |
 
-The component automatically detects which framework is being used and configures the appropriate timer APIs via compile-time directives.
+Both frameworks use the ESP-IDF GPTimer driver for sampling the motor's data signal.
 
 ### Framework Selection
 
-To use the Arduino framework (default):
+To use the Arduino framework:
 ```yaml
 esp32:
   board: esp32dev
@@ -37,6 +37,27 @@ esp32:
   framework:
     type: esp-idf
 ```
+
+### ESPHome 2026.9 and newer
+
+ESPHome 2026.9 excludes the ESP-IDF GPTimer driver by default. This component
+automatically requests `esp_driver_gptimer` during code generation and remains
+compatible with older ESPHome versions.
+
+If using an older copy of this component and compilation fails with
+`driver/gptimer.h: No such file or directory`, update the component or merge this
+workaround into your existing `esp32` configuration:
+
+```yaml
+esp32:
+  framework:
+    type: esp-idf
+    advanced:
+      include_builtin_idf_components:
+        - esp_driver_gptimer
+```
+
+Do not edit the generated `src/CMakeLists.txt`; ESPHome recreates it during builds.
 
 ## Wiring
 
@@ -71,9 +92,10 @@ A better way to trigger the motor is via an optocoupler.
 
 ## Configuration
 
-Two example yaml config files are provided here.
+Example YAML configuration files are provided here.
 
-- `dc_blue_local.yaml` can be used to locally compile the ESPhome firmware image.
+- `dc_blue_local_idf.yaml` builds the local component with ESP-IDF.
+- `dc_blue_local_arduino.yaml` builds the local component with Arduino.
 - `dc_blue.yaml` shows a working config file from the ESPhome Home Assistant addon.
 
 We will now describe the main additions you will need to add the DC Blue component to your device config.
@@ -111,7 +133,9 @@ dc_blue:
 
 `data_pin` is where the digital signal from the motor is received.
 `trigger_pin` will send a pulse when the motor is triggered.
-`symbol_period` is the data rate of the digital signal. This will likely not need to be changed.
+`symbol_period` is the time per bit in microseconds. This will likely not need to be changed.
+Both pins must be internal ESP32 GPIOs. Pin inversion and configured input pull-ups
+are respected. The `cover` and `binary_sensor` entities are optional.
 
 ### Configure light sensor
 
@@ -151,18 +175,44 @@ This also adds the controls to open, close of stop the door.
 
 ## Limitations
 
-The motor reports a "running" state, not a "opening" and "closing" state.
-This component assumes "opening" if the motor was closed, and the new state is "running".
-The same for "open" to "running".
+The motor reports motion without distinguishing opening from closing. Direction
+is inferred from the last fully open or fully closed report. Intermediate stops
+and reversals cannot be reliably tracked, so the cover reports an assumed state.
+At startup, it assumes the door is closed and idle until motor feedback arrives.
+Light and AC supply sensors remain unknown until their first valid report.
 
-The open, close and stop triggers all just send a single pulse to the motor.
-This is similar to pressing the button on the remote.
-For example, pressing stop during closing of the door does not stop the door, but will make it open up again.
-This component does not take all these different state transitions into account, but simply sends a pulse, then interprets the state the motor reports afterwards.
+OPEN, CLOSE, STOP and TOGGLE all use the motor's single button input. STOP cancels
+any pending pulse and sends no pulse when the reported operation is idle. While
+moving, STOP sends a button pulse; the motor may reverse instead of stopping,
+depending on its own button behavior. It is not a dedicated stop input.
 
-While the door is opening, pressing stop twice will therefore close the door.
+OPEN/CLOSE commands are ignored while moving or while a trigger is being
+processed, and do nothing if the door already reports the requested endpoint.
+TOGGLE can queue one additional pulse. Extra pending requests are ignored so
+commands cannot accumulate a long sequence of delayed movements. Each pulse is
+separated by at least `clear_period` milliseconds. Shutdown releases the trigger
+output and stops the receiver.
 
-This can be improved by better handling of the door state in `dc_blue_cover.cpp`.
+## Development checks
+
+Run the host regression checks with a C++17 compiler and Python 3:
+
+```sh
+python3 tests/run_tests.py
+```
+
+These compile the actual component sources with small GPIO, timer and ESPHome
+test doubles. They check decoding, checksums, queue overflow and concurrency,
+pulse timing, command handling, timer setup failures, and resource cleanup. Address and
+undefined-behavior sanitizers are enabled. Hardware timing still needs testing
+on a connected ESP32 and motor.
+
+Build both framework examples to check the real ESPHome and ESP-IDF interfaces:
+
+```sh
+esphome compile dc_blue_local_idf.yaml
+esphome compile dc_blue_local_arduino.yaml
+```
 
 ## Factory firmware
 

@@ -1,7 +1,6 @@
-CONF_DC_BLUE_ID = "dc_blue_id"
-
-CONF_OPEN = "open"
-CONF_CLOSED = "closed"
-CONF_RUNNING = "running"
-CONF_LIGHT = "light"
 CONF_AC_POWER = "ac_power"
+CONF_CLEAR_PERIOD = "clear_period"
+CONF_DC_BLUE_ID = "dc_blue_id"
+CONF_LIGHT = "light"
+CONF_SYMBOL_PERIOD = "symbol_period"
+CONF_TRIGGER_PERIOD = "trigger_period"
